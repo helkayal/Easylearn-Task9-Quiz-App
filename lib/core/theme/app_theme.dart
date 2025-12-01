@@ -11,6 +11,7 @@ abstract final class AppTheme {
         fontSize: 22,
         fontWeight: FontWeight.bold,
       ),
+      centerTitle: true,
       elevation: 0,
     ),
   );

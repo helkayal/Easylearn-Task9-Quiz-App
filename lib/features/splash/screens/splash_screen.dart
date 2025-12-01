@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task9_quiz_app/core/theme/app_colors.dart';
 import 'package:task9_quiz_app/core/utils/app_string.dart';
-import 'package:task9_quiz_app/features/home/screens/home_screen.dart';
+import 'package:task9_quiz_app/features/home/presentation/screens/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
