@@ -14,6 +14,7 @@ class QuestionCard extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
             alignment: Alignment.center,
             width: screenWidth,
             height: 100,
@@ -23,6 +24,7 @@ class QuestionCard extends StatelessWidget {
             ),
             child: Text(
               questionText,
+              textAlign: TextAlign.center,
               style: TextStyle(fontSize: 20, color: AppColors.blackColor),
             ),
           ),

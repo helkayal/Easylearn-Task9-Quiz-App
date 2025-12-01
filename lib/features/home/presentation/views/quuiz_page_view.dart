@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task9_quiz_app/core/theme/app_colors.dart';
 import 'package:task9_quiz_app/core/utils/app_string.dart';
+import 'package:task9_quiz_app/features/home/model/quiz_model.dart';
 import 'package:task9_quiz_app/features/home/presentation/widgets/answer_card.dart';
 import 'package:task9_quiz_app/features/home/presentation/widgets/question_card.dart';
 
@@ -12,32 +13,13 @@ class QuuizPageView extends StatefulWidget {
 }
 
 class _QuuizPageViewState extends State<QuuizPageView> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-  final int _totalPages = 5;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController.addListener(() {
-      final int page = (_pageController.page ?? 0).round();
-      if (page != _currentPage) setState(() => _currentPage = page);
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+  final int _totalPages = quizData.length;
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return PageView.builder(
-      controller: _pageController,
-      physics: const NeverScrollableScrollPhysics(),
       itemCount: _totalPages,
       itemBuilder: (context, index) {
         return Padding(
@@ -47,11 +29,9 @@ class _QuuizPageViewState extends State<QuuizPageView> {
             children: [
               buildQuestNoText(index),
               SizedBox(height: 50),
-              QuestionCard(
-                questionText: 'This is question number ${index + 1}?',
-              ),
+              QuestionCard(questionText: quizData[index].question),
               Spacer(),
-              buildAnswersList(),
+              buildAnswersList(index),
               Spacer(),
               Center(child: buildNextButton(screenWidth)),
               Spacer(),
@@ -62,9 +42,9 @@ class _QuuizPageViewState extends State<QuuizPageView> {
     );
   }
 
-  Text buildQuestNoText(int index) {
+  Text buildQuestNoText(int questionIndex) {
     return Text(
-      '${AppString.questionNoText} ${index + 1} / $_totalPages',
+      '${AppString.questionNoText} ${questionIndex + 1} / $_totalPages',
       style: TextStyle(
         color: AppColors.whiteColor,
         fontSize: 24,
@@ -73,12 +53,15 @@ class _QuuizPageViewState extends State<QuuizPageView> {
     );
   }
 
-  ListView buildAnswersList() {
+  ListView buildAnswersList(int questionIndex) {
     return ListView.separated(
       itemBuilder: (context, optionIndex) {
-        return AnswerCard(answerText: 'This is option ${optionIndex + 1}');
+        return AnswerCard(
+          answerText: quizData[questionIndex].answers.keys
+              .toList()[optionIndex],
+        );
       },
-      itemCount: 4,
+      itemCount: quizData[questionIndex].answers.length,
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       separatorBuilder: (BuildContext context, int index) {
@@ -89,15 +72,7 @@ class _QuuizPageViewState extends State<QuuizPageView> {
 
   ElevatedButton buildNextButton(double screenWidth) {
     return ElevatedButton(
-      onPressed: () {
-        if (_currentPage < _totalPages - 1) {
-          _pageController.animateToPage(
-            _currentPage + 1,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        } else {}
-      },
+      onPressed: () {},
       style: ElevatedButton.styleFrom(
         minimumSize: Size(screenWidth, 48),
         backgroundColor: AppColors.whiteColor,
@@ -105,9 +80,7 @@ class _QuuizPageViewState extends State<QuuizPageView> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       child: Text(
-        _currentPage < _totalPages - 1
-            ? AppString.nextLabel
-            : AppString.submitLabel,
+        AppString.nextLabel,
         style: TextStyle(color: AppColors.blackColor, fontSize: 20),
       ),
     );
