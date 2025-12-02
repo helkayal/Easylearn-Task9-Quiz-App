@@ -12,7 +12,7 @@ final List<QuizModel> quizData = [
   ),
   QuizModel(
     question: 'Which planet is known as the Red Planet?',
-    answers: {'Earth': false, 'Mars': true, 'Jupiter': false, 'Saturn': false},
+    answers: {'Earth': false, 'Mars': true, 'Saturn': false},
   ),
   QuizModel(
     question: 'Who wrote "Hamlet"?',
@@ -24,13 +24,8 @@ final List<QuizModel> quizData = [
     },
   ),
   QuizModel(
-    question: 'What is the largest ocean on Earth?',
-    answers: {
-      'Atlantic Ocean': false,
-      'Indian Ocean': false,
-      'Arctic Ocean': false,
-      'Pacific Ocean': true,
-    },
+    question: 'Is the Pacific Ocean the largest ocean on Earth?',
+    answers: {'true': true, 'false': false},
   ),
   QuizModel(
     question: 'What is the chemical symbol for gold?',

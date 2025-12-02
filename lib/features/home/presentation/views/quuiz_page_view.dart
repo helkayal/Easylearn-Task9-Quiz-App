@@ -14,6 +14,15 @@ class QuuizPageView extends StatefulWidget {
 
 class _QuuizPageViewState extends State<QuuizPageView> {
   final int _totalPages = quizData.length;
+  late int _currentPage;
+  late Map<int, int> _selectedAnswers;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = 0;
+    _selectedAnswers = {};
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +36,11 @@ class _QuuizPageViewState extends State<QuuizPageView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildQuestNoText(index),
+              buildQuestNoText(),
               SizedBox(height: 50),
-              QuestionCard(questionText: quizData[index].question),
+              QuestionCard(questionText: quizData[_currentPage].question),
               Spacer(),
-              buildAnswersList(index),
+              buildAnswersList(),
               Spacer(),
               Center(child: buildNextButton(screenWidth)),
               Spacer(),
@@ -42,9 +51,9 @@ class _QuuizPageViewState extends State<QuuizPageView> {
     );
   }
 
-  Text buildQuestNoText(int questionIndex) {
+  Text buildQuestNoText() {
     return Text(
-      '${AppString.questionNoText} ${questionIndex + 1} / $_totalPages',
+      '${AppString.questionNoText} ${_currentPage + 1} / $_totalPages',
       style: TextStyle(
         color: AppColors.whiteColor,
         fontSize: 24,
@@ -53,15 +62,21 @@ class _QuuizPageViewState extends State<QuuizPageView> {
     );
   }
 
-  ListView buildAnswersList(int questionIndex) {
+  ListView buildAnswersList() {
     return ListView.separated(
       itemBuilder: (context, optionIndex) {
+        final isSelected = _selectedAnswers[_currentPage] == optionIndex;
         return AnswerCard(
-          answerText: quizData[questionIndex].answers.keys
-              .toList()[optionIndex],
+          answerText: quizData[_currentPage].answers.keys.toList()[optionIndex],
+          isSelected: isSelected,
+          onTap: () {
+            setState(() {
+              _selectedAnswers[_currentPage] = optionIndex;
+            });
+          },
         );
       },
-      itemCount: quizData[questionIndex].answers.length,
+      itemCount: quizData[_currentPage].answers.length,
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       separatorBuilder: (BuildContext context, int index) {
@@ -72,7 +87,24 @@ class _QuuizPageViewState extends State<QuuizPageView> {
 
   ElevatedButton buildNextButton(double screenWidth) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        setState(() {
+          if (_currentPage < _totalPages - 1) {
+            _currentPage++;
+          } else {
+            int finalScore = 0;
+            _selectedAnswers.forEach((questionIndex, selectedAnswerIndex) {
+              bool isCorrectAnswer = quizData[questionIndex].answers.values
+                  .toList()[selectedAnswerIndex];
+              if (isCorrectAnswer) {
+                finalScore++;
+              }
+            });
+
+            buildResultDialog(finalScore);
+          }
+        });
+      },
       style: ElevatedButton.styleFrom(
         minimumSize: Size(screenWidth, 48),
         backgroundColor: AppColors.whiteColor,
@@ -80,9 +112,57 @@ class _QuuizPageViewState extends State<QuuizPageView> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       child: Text(
-        AppString.nextLabel,
+        _currentPage == _totalPages - 1
+            ? AppString.submitLabel
+            : AppString.nextLabel,
         style: TextStyle(color: AppColors.blackColor, fontSize: 20),
       ),
+    );
+  }
+
+  Future<dynamic> buildResultDialog(int finalScore) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        bool isPassed = finalScore >= (_totalPages / 2).ceil();
+        String resultMessage = isPassed
+            ? '${AppString.successText} $finalScore / $_totalPages'
+            : '${AppString.failedText} $finalScore / $_totalPages';
+        return AlertDialog(
+          backgroundColor: AppColors.whiteColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          title: Text(
+            resultMessage,
+            style: TextStyle(
+              fontSize: 24,
+              color: isPassed ? AppColors.greenColor : AppColors.redColor,
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: AppColors.blackColor,
+                foregroundColor: AppColors.whiteColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: Text(AppString.restartLabel),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _currentPage = 0;
+                  _selectedAnswers = {};
+                });
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
